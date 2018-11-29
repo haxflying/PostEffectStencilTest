@@ -12,9 +12,11 @@ public class PostEffectTest : MonoBehaviour {
     private RenderTexture stencilCopy;
 
     void Start () {
+
+        postMat = new Material(postEffectShader);
         //stencilCopy = Shader.PropertyToID("stencilCopy");
         stencilCopy = new RenderTexture(Screen.width, Screen.height, 24);
-        postMat = new Material(postEffectShader);
+        stencilCopy.name = "StencilCopy";
         cam = GetComponent<Camera>();
         cmd = new CommandBuffer();
         cmd.name = "stencil copy";
@@ -27,17 +29,21 @@ public class PostEffectTest : MonoBehaviour {
         if (cmd == null)
             return;
 
-        cmd.Clear();             
+        cmd.Clear();
+        //cmd.SetRenderTarget(BuiltinRenderTextureType.CurrentActive, stencilCopy.depthBuffer);
+        //cmd.SetRenderTarget(stencilCopy);
         cmd.Blit(BuiltinRenderTextureType.CurrentActive, stencilCopy);
+        cmd.SetRenderTarget(stencilCopy);
     }
 
-    [ImageEffectOpaque]
     private void OnRenderImage(RenderTexture src, RenderTexture dst)
-    {
-        if(postMat != null)
-        {
-            //Graphics.SetRenderTarget(stencilCopy);
-            Graphics.Blit(src, dst, postMat);
+    { 
+        if (postMat != null)
+        {         
+            var temp = RenderTexture.GetTemporary(Screen.width, Screen.height, 24);
+            Graphics.SetRenderTarget(temp.colorBuffer, src.depthBuffer);
+            Graphics.Blit(temp, dst, postMat);
+            RenderTexture.ReleaseTemporary(temp);
         }
         else
         {
