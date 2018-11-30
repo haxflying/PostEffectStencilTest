@@ -10,13 +10,16 @@ public class PostEffectTest : MonoBehaviour {
     private CommandBuffer cmd;
     private Camera cam;
     private RenderTexture stencilCopy;
+    private List<StencilMaskObject> maskList = new List<StencilMaskObject>();
 
     void Start () {
 
         postMat = new Material(postEffectShader);
-        //stencilCopy = Shader.PropertyToID("stencilCopy");
         stencilCopy = new RenderTexture(Screen.width, Screen.height, 24);
         stencilCopy.name = "StencilCopy";
+
+        maskList = new List<StencilMaskObject>(FindObjectsOfType<StencilMaskObject>());
+
         cam = GetComponent<Camera>();
         cmd = new CommandBuffer();
         cmd.name = "stencil copy";
@@ -32,8 +35,12 @@ public class PostEffectTest : MonoBehaviour {
         cmd.Clear();
         //cmd.SetRenderTarget(BuiltinRenderTextureType.CurrentActive, stencilCopy.depthBuffer);
         //cmd.SetRenderTarget(stencilCopy);
-        cmd.Blit(BuiltinRenderTextureType.CurrentActive, stencilCopy);
+        //cmd.Blit(BuiltinRenderTextureType.CurrentActive, stencilCopy);
         cmd.SetRenderTarget(stencilCopy);
+        foreach(var obj in maskList)
+        {
+            cmd.DrawRenderer(obj.GetComponent<Renderer>(), obj.GetComponent<Renderer>().sharedMaterial, 0, 0);
+        }
     }
 
     private void OnRenderImage(RenderTexture src, RenderTexture dst)
@@ -41,8 +48,9 @@ public class PostEffectTest : MonoBehaviour {
         if (postMat != null)
         {         
             var temp = RenderTexture.GetTemporary(Screen.width, Screen.height, 24);
-            Graphics.SetRenderTarget(temp.colorBuffer, src.depthBuffer);
-            Graphics.Blit(temp, dst, postMat);
+            Graphics.SetRenderTarget(temp.colorBuffer, stencilCopy.depthBuffer);
+            Graphics.Blit(src, postMat);
+            Graphics.Blit(temp, dst);
             RenderTexture.ReleaseTemporary(temp);
         }
         else
