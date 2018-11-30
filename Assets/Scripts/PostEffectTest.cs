@@ -37,7 +37,7 @@ public class PostEffectTest : MonoBehaviour {
         //cmd.SetRenderTarget(stencilCopy);
         //cmd.Blit(BuiltinRenderTextureType.CurrentActive, stencilCopy);
         cmd.SetRenderTarget(stencilCopy);
-        foreach(var obj in maskList)
+        foreach (var obj in maskList)
         {
             cmd.DrawRenderer(obj.GetComponent<Renderer>(), obj.GetComponent<Renderer>().sharedMaterial, 0, 0);
         }
@@ -48,6 +48,7 @@ public class PostEffectTest : MonoBehaviour {
         if (postMat != null)
         {         
             var temp = RenderTexture.GetTemporary(Screen.width, Screen.height, 24);
+            Graphics.Blit(src, temp);
             Graphics.SetRenderTarget(temp.colorBuffer, stencilCopy.depthBuffer);
             Graphics.Blit(src, postMat);
             Graphics.Blit(temp, dst);
