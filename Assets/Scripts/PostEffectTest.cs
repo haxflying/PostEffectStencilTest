@@ -7,16 +7,11 @@ public class PostEffectTest : MonoBehaviour {
 
     public Shader postEffectShader;
     private Material postMat;
-    private CommandBuffer cb_stencilCopy;
-    private CommandBuffer cb_finalBlit;
-    private Camera cam;
-    private RenderTexture stencilCopy;
+
 
     void Start()
     {
         postMat = new Material(postEffectShader);
-        stencilCopy = new RenderTexture(Screen.width, Screen.height, 24);
-        stencilCopy.name = "stencilCopy";
     }
 
 

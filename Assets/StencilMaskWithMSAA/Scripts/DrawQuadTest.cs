@@ -56,7 +56,19 @@ public class DrawQuadTest : MonoBehaviour {
         cb = new CommandBuffer();
         cb.name = "Draw Quad!!";
 
-        cam.AddCommandBuffer(CameraEvent.AfterForwardOpaque, cb);     
+        cam.AddCommandBuffer(CameraEvent.AfterForwardOpaque, cb);
+        int currentFrame = Shader.PropertyToID("_currentFrame");
+        cb.GetTemporaryRT(currentFrame, -1, -1);
+        cb.Blit(BuiltinRenderTextureType.CurrentActive, currentFrame);
+        cb.SetGlobalTexture("_currentFrame", currentFrame);
+        cb.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
         cb.DrawMesh(quad, Matrix4x4.identity, quadMat);
-    }  
+
+        
+    }
+
+    //private void OnRenderImage(RenderTexture source, RenderTexture destination)
+    //{
+    //    Graphics.Blit(source, destination, quadMat);
+    //}
 }
